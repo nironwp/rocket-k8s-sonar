@@ -131,6 +131,13 @@ jobs:
           tags: |
             ${{secrets.DOCKERHUB_USER}}/${{secrets.DOCKERHUB_NEXT_IMAGE_NAME}}:${{github.run_number}}
             ${{secrets.DOCKERHUB_USER}}/${{secrets.DOCKERHUB_NEXT_IMAGE_NAME}}:latest
-    # ocean:
-    #   needs: analysis
-    #   if: needs.analysis.outputs.digitaloceanexists == 'true'
+  ocean:
+    needs: analysis
+    if: needs.analysis.outputs.digitaloceanexists == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.1.0
+
+      - name: Confirmation of the DigitalOcean presence
+        run: |
+          echo true
