@@ -87,11 +87,11 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      # - name: SonarCloud Scan
+      #   uses: SonarSource/sonarcloud-github-action@master
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: Checks if the digital ocean access token exists
         id: digitaloceanexists
         env: 
@@ -109,35 +109,51 @@ jobs:
         - name: Deploy to GitHub Pages
           id: deployment
           uses: actions/deploy-pages@v1
-
-  docker:
-    needs: [analysis]
-    if: needs.analysis.outputs.digitaloceanexists != 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3.1.0
+  # Uncomment this line to use docker
+  # docker:
+  #   needs: [analysis]
+  #   if: needs.analysis.outputs.digitaloceanexists != 'true'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3.1.0
       
-      - name: Authentication on Docker Hub
-        uses: docker/login-action@v2.1.0
-        with:
-          username: ${{secrets.DOCKERHUB_USER}}
-          password: ${{secrets.DOCKERHUB_PWD}}
+  #     - name: Authentication on Docker Hub
+  #       uses: docker/login-action@v2.1.0
+  #       with:
+  #         username: ${{secrets.DOCKERHUB_USER}}
+  #         password: ${{secrets.DOCKERHUB_PWD}}
       
-      - name: Build and push the docker image
-        uses: docker/build-push-action@v3.2.0
-        with: 
-          file: ./Dockerfile
-          push: true
-          tags: |
-            ${{secrets.DOCKERHUB_USER}}/${{secrets.DOCKERHUB_NEXT_IMAGE_NAME}}:${{github.run_number}}
-            ${{secrets.DOCKERHUB_USER}}/${{secrets.DOCKERHUB_NEXT_IMAGE_NAME}}:latest
+  #     - name: Build and push the docker image
+  #       uses: docker/build-push-action@v3.2.0
+  #       with: 
+  #         file: ./Dockerfile
+  #         push: true
+  #         tags: |
+  #           ${{secrets.DOCKERHUB_USER}}/${{secrets.DOCKERHUB_NEXT_IMAGE_NAME}}:${{github.run_number}}
+  #           ${{secrets.DOCKERHUB_USER}}/${{secrets.DOCKERHUB_NEXT_IMAGE_NAME}}:latest
   ocean:
     needs: analysis
     if: needs.analysis.outputs.digitaloceanexists == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3.1.0
+          
+  
 
-      - name: Confirmation of the DigitalOcean presence
-        run: |
-          echo true
+  registry:
+    needs: [ocean]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v2
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_TOKEN }}
+
+      - name: Log in to DigitalOcean Container Registry with short-lived credentials
+        run: doctl registry login --expiry-seconds 900
+
+      - name: Push app image to DigitalOcean Container Registry
+        run: docker push registry.digitalocean.com/${{secrets.REGISTRY_NAME}}/${{secrets.REGISTRY_IMAGE_NAME}}:$(echo $GITHUB_SHA | head -c7)
