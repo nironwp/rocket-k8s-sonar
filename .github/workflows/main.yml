@@ -103,3 +103,24 @@ jobs:
         - name: Deploy to GitHub Pages
           id: deployment
           uses: actions/deploy-pages@v1
+
+  docker:
+    runs-on: ubuntu-latest
+    if: secrets.DOCKERHUB_PWD && !secrets.DIGITALOCEAN_TOKEN && secrets.DOCKERHUB_USER && secrets.DOCKERHUB_NEXT_IMAGE_NAME
+    steps:
+      - uses: actions/checkout@v3.1.0
+      
+      - name: Authentication on Docker Hub
+        uses: docker/login-action@v2.1.0
+        with:
+          username: ${{secrets.DOCKERHUB_USER}}
+          password: ${{secrets.DOCKERHUB_PWD}}
+      
+      - name: Build and push the docker image
+        uses: docker/build-push-action@v3.2.0
+        with: 
+          file: $GITHUB_WORKSPACE/Dockerfile
+          push: true
+          tags: |
+            ${{secrets.DOCKERHUB_USER}}/${{secrets.DOCKERHUB_NEXT_IMAGE_NAME}}:${{github.run_number}}
+            ${{secrets.DOCKERHUB_USER}}/${{secrets.DOCKERHUB_NEXT_IMAGE_NAME}}:latest
