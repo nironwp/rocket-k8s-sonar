@@ -92,7 +92,6 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           run: |
-            yarn test --coverage --coverageReporters=lcov
             sonar-scanner \
               -Dsonar.organization=nironwp \
               -Dsonar.projectKey=nironwp_rocket-k8s-sonar \
