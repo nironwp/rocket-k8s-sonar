@@ -92,6 +92,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Checks if the digital ocean access token exists
+        id: digitaloceanexists
+        env: 
+          DIGITALOCEAN_TOKEN: ${{secrets.DIGITALOCEAN_TOKEN}}
+        run: |
+          echo "Enable digital ocean token to run this"
+          echo "::set-output name=digitaloceanexists::${{ env.DIGITALOCEAN_TOKEN != '' }}"
   pages:
       environment:
         name: github-pages
@@ -105,9 +112,8 @@ jobs:
 
   docker:
     needs: analysis
+    if: needs.analysis.outputs.digitaloceanexists == 'false'
     runs-on: ubuntu-latest
-    if: secrets.exists.DOCKERHUB_PWD
-    # if: ${{secrets.DOCKERHUB_PWD}} && ${{!secrets.DIGITALOCEAN_TOKEN}} && ${{secrets.DOCKERHUB_USER}} && ${{secrets.DOCKERHUB_NEXT_IMAGE_NAME}}
     steps:
       - uses: actions/checkout@v3.1.0
       
