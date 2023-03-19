@@ -106,6 +106,7 @@ jobs:
   docker:
     needs: analysis
     runs-on: ubuntu-latest
+    if: ${{secrets.DOCKERHUB_PWD}} && ${{!secrets.DIGITALOCEAN_TOKEN}} && ${{secrets.DOCKERHUB_USER}} && ${{secrets.DOCKERHUB_NEXT_IMAGE_NAME}}
     steps:
       - uses: actions/checkout@v3.1.0
       
