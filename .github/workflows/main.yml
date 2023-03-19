@@ -154,4 +154,24 @@ jobs:
         run: doctl registry login --expiry-seconds 900
 
       - name: Push app image to DigitalOcean Container Registry
-        run: docker push registry.digitalocean.com/registry-maion/nextjs:$(echo $GITHUB_SHA | head -c7)
+        run: docker push registry.digitalocean.com/registry-maion/nextjs:${{github.run_number}}
+
+  kubernetes:
+    needs: [registry]
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v3.1.0
+      
+      - name: Setting the context
+        uses: Azure/k8s-set-context@v3.0
+        with:
+          method: kubeconfig
+          kubeconfig: ${{secrets.K8S_CONFIG}}
+      
+      - name: Deploy to kubernetes
+        uses: Azure/k8s-deploy@v4
+        with:
+          images: registry.digitalocean.com/registry-maion/nextjs:${{github.run_number}}
+          manifests: |
+            k8s/deployment.yaml
+    
