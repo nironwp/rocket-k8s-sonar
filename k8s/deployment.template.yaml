@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: web
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: web
@@ -17,7 +17,10 @@ spec:
           image: registry.digitalocean.com/registry-maion/nextjs:1
           env:
             - name: REPLICATE_API_TOKEN
-              value: <REPLICATE_API_TOKEN_VALUE>
+              valueFrom:
+                secretKeyRef:
+                  name: my-secret
+                  key: replicate-api-token
           ports:
           - containerPort: 3000
           resources:
