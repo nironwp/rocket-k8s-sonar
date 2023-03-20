@@ -153,6 +153,10 @@ jobs:
       - name: Log in to DigitalOcean Container Registry with short-lived credentials
         run: doctl registry login --expiry-seconds 900
 
+      - name: Build app container image
+        run: docker build -t registry.digitalocean.com/registry-maion/nextjs:${{github.run_number}} .
+
+
       - name: Push app image to DigitalOcean Container Registry
         run: docker push registry.digitalocean.com/registry-maion/nextjs:${{github.run_number}}
 
