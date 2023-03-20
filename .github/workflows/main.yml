@@ -110,7 +110,8 @@ jobs:
         - name: Deploy to GitHub Pages
           id: deployment
           uses: actions/deploy-pages@v1
-  # Uncomment this line to use docker
+    
+  # Uncomment this lines to use docker
   # docker:
   #   needs: [analysis]
   #   if: needs.analysis.outputs.digitaloceanexists != 'true'
@@ -132,6 +133,7 @@ jobs:
   #         tags: |
   #           ${{secrets.DOCKERHUB_USER}}/${{secrets.DOCKERHUB_NEXT_IMAGE_NAME}}:${{github.run_number}}
   #           ${{secrets.DOCKERHUB_USER}}/${{secrets.DOCKERHUB_NEXT_IMAGE_NAME}}:latest
+
   ocean:
     needs: analysis
     runs-on: ubuntu-latest

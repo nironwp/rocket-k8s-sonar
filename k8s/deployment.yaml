@@ -16,7 +16,7 @@ spec:
         - name: web
           image: registry.digitalocean.com/registry-maion/nextjs:1
           ports:
-          - containerPort: 8080
+          - containerPort: 3000
           resources:
             limits:
               memory: "128Mi"
@@ -31,5 +31,5 @@ spec:
     app: web
   ports:
     - port: 80
-      targetPort: 8080
+      targetPort: 3000
   type: LoadBalancer
